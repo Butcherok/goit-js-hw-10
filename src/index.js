@@ -71,16 +71,21 @@ function selectOption(countries) {
         onClearPageList();
         onFetchErrorInfo();
         return markup = '';
-    } else if (quantity === 0) {
-        // onClearPageInfo();
-        // onClearPageList();
-        onFetchError();
-        return markup = '';
-    } else if (quantity === "") {
-        // onClearPageInfo();
-        // onClearPageList();
-        return markup = '';
     }
+    // else if (quantity === 0) {
+    //     onClearPageInfo();
+    //     onClearPageList();
+    //     // onFetchError();
+    //     // markup = '';
+    //     throw new Error("No data");
+    //     // return markup = '';
+    // } else if (quantity === "") {
+    //     onClearPageInfo();
+    //     onClearPageList();
+    //     // return markup = '';
+    //     // markup = '';
+    //     throw new Error("empty");
+    // }
 }
 
 function updatePageData(markup) {
@@ -104,6 +109,9 @@ function onFetchErrorInfo() {
 }
 
 function onFetchError() {
+    onClearPageInfo();
+    onClearPageList();
+
     Notiflix.Notify.failure('Oops, there is no country with that name');
 }
 
