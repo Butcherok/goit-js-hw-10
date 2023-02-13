@@ -16,6 +16,12 @@ form.addEventListener("input", debounce(onSearch, DEBOUNCE_DELAY));
 function onSearch(e) {
     inputData = e.target.value.trim();
 
+    if (inputData === '') {
+        onClearPageInfo();
+        onClearPageList();
+        return;
+    }
+
     fetchCountries(inputData)
     .then(selectOption)
     .then(updatePageData)
@@ -25,27 +31,21 @@ function onSearch(e) {
 function createCountryCard({flags, name, capital, population, languages}) {
     const languageList = languages.map(language => language.name);
     return `
-    <div class="card">
-    <p class="country_name">
-        <span class="country_flag">
-        <img src="${flags.svg}" width="30px" height="20px">
-        </span> <b>${name}</b>
-    </p>
-    <p class="country_descr"> <b>Capital:</b> ${capital}</p>
-    <p class="country_descr"> <b>Population:</b> ${population}</p>
-    <p class="country_descr"> <b>Languages:</b> ${Object.values(languageList).join(', ')}</p>
-    </div>
+    <h1 class="country-title"><img src='${flags.svg}'width="150px"/>
+        <span class="country-title__name">${name}</span>
+    </h1>
+    <ul class="country-props">
+        <li class="country-props__item"><b>Capital:</b> ${capital}</li>
+        <li class="country-props__item"><b>Population:</b> ${population}</li>
+        <li class="country-props__item"><b>Languages:</b> ${Object.values(languageList).join(', ')}</li>
+    </ul>
     `;
 }
 
 function createCountryList(country) {
     return `
-    <li>
-        <p class="country_name">
-            <span class="country_flag">
-                <img src="${country.flags.svg}" width="30px" height="20px">
-            </span> <b>${country.name}</b>
-        </p>
+    <li class="country-list__li"><img src='${country.flags.svg}'width="50px"/>
+        <span class="country-list__name">${country.name}</span>
     </li>
     `;
 }
@@ -53,7 +53,7 @@ function createCountryList(country) {
 function selectOption(countries) {
     const quantity = countries.length;
     if (quantity === 1) {
-        onClearPageInfo();
+        onClearPageList();
 
         return countries.reduce(
             (markup, country) => createCountryCard(country) + markup,
@@ -72,27 +72,12 @@ function selectOption(countries) {
         onFetchErrorInfo();
         return markup = '';
     }
-    // else if (quantity === 0) {
-    //     onClearPageInfo();
-    //     onClearPageList();
-    //     // onFetchError();
-    //     // markup = '';
-    //     throw new Error("No data");
-    //     // return markup = '';
-    // } else if (quantity === "") {
-    //     onClearPageInfo();
-    //     onClearPageList();
-    //     // return markup = '';
-    //     // markup = '';
-    //     throw new Error("empty");
-    // }
 }
 
 function updatePageData(markup) {
-    if (markup === createCountryCard) {
+    if (markup.includes('h1') ) {
         countryInfo.innerHTML = markup;
     } else  countryList.innerHTML = markup;
-
 }
 
 function onClearPageInfo() {
@@ -103,38 +88,15 @@ function onClearPageList() {
     countryList.innerHTML = '';
 }
 
-
 function onFetchErrorInfo() {
     Notiflix.Notify.info("Too many matches found. Please enter a more specific name.")
 }
 
-function onFetchError() {
+function onFetchError(error) {
     onClearPageInfo();
     onClearPageList();
 
-    Notiflix.Notify.failure('Oops, there is no country with that name');
+    if (error.message === '404') {
+        Notiflix.Notify.failure('Oops, there is no country with that name');
+    }
 }
-
-
-// Якщо у відповіді бекенд повернув більше ніж 10 країн, в інтерфейсі з'являється повідомлення
-// "Too many matches found. Please enter a more specific name."
-
-// Якщо бекенд повернув від 2-х до 10-и країн,
-// Кожен елемент списку складається з прапора та назви країни.
-
-// Якщо результат запиту - це масив з однією країною, 
-// про країну: прапор, назва, столиця, населення і мови.
-
-// Якщо користувач ввів назву країни, якої не існує, 
-// бекенд поверне не порожній масив, а помилку зі статус кодом 404 - не знайдено.
-// Додай повідомлення "Oops, there is no country with that name"
-
-// Не забувай про те, що fetch не вважає 404 помилкою, тому необхідно явно відхилити проміс, щоб можна було зловити і обробити помилку.
-
-// Notiflix.Report.success('Title', 'Message', 'Button Text');
-
-// Notiflix.Report.failure('Title', 'Message', 'Button Text');
-
-// Notiflix.Report.warning('Title', 'Message', 'Button Text');
-
-// Notiflix.Report.info('Title', 'Message', 'Button Text');
